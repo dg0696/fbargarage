@@ -1,0 +1,17 @@
+{
+  "mcpServers": {
+    "cloudflare": { "url": "https://mcp.cloudflare.com/mcp" },
+    "cloudflare-docs": { "url": "https://docs.mcp.cloudflare.com/mcp" },
+    "cloudflare-bindings": { "url": "https://bindings.mcp.cloudflare.com/mcp" },
+    "cloudflare-builds": { "url": "https://builds.mcp.cloudflare.com/mcp" },
+    "cloudflare-observability": { "url": "https://observability.mcp.cloudflare.com/mcp" },
+    "ebay-api": {
+      "command": "npx",
+      "args": ["-y", "@ebay/npm-public-api-mcp@latest"],
+      "env": {
+        "EBAY_CLIENT_TOKEN": "PASTE_ACCESS_TOKEN_HERE",
+        "EBAY_API_ENV": "sandbox"
+      }
+    }
+  }
+}

@@ -1,0 +1,26 @@
+{% set qs = (query ~ '&') if query else '' %}
+<nav class="pager" aria-label="Table pages">
+  {% if page > 1 %}
+    <a href="{{ path }}?{{ qs }}page=1">First</a>
+    <a href="{{ path }}?{{ qs }}page={{ page - 1 }}">Previous</a>
+  {% else %}
+    <span class="pager-off" aria-disabled="true">First</span>
+    <span class="pager-off" aria-disabled="true">Previous</span>
+  {% endif %}
+  {% for n in pager %}
+    {% if n is none %}
+      <span class="pager-gap">…</span>
+    {% elif n == page %}
+      <span class="pager-current" aria-current="page">{{ n }}</span>
+    {% else %}
+      <a href="{{ path }}?{{ qs }}page={{ n }}">{{ n }}</a>
+    {% endif %}
+  {% endfor %}
+  {% if page < pages %}
+    <a href="{{ path }}?{{ qs }}page={{ page + 1 }}">Next</a>
+    <a href="{{ path }}?{{ qs }}page={{ pages }}">Last</a>
+  {% else %}
+    <span class="pager-off" aria-disabled="true">Next</span>
+    <span class="pager-off" aria-disabled="true">Last</span>
+  {% endif %}
+</nav>

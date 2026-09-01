@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block body %}
+<h1>Listings</h1>
+<p class="muted">{{ total }} matching · page {{ page }} of {{ pages }}.</p>
+{% if ok %}<p class="banner ok">{{ ok }}</p>{% endif %}
+{% if err %}<p class="banner err">{{ err }}</p>{% endif %}
+<div class="toolbar">
+<form class="filters" method="get" action="/listings">
+  <label>Search
+    <input type="search" name="q" value="{{ q }}" placeholder="SKU, title, item ID">
+  </label>
+  <label>Stream
+    <select name="stream">
+      <option value="">any</option>
+      {% for s in streams %}
+      <option value="{{ s }}" {% if s == stream %}selected{% endif %}>{{ s }}</option>
+      {% endfor %}
+    </select>
+  </label>
+  <label>Status
+    <select name="status">
+      <option value="active" {% if status == 'active' %}selected{% endif %}>active</option>
+      <option value="ended" {% if status == 'ended' %}selected{% endif %}>ended</option>
+      <option value="all" {% if status == 'all' %}selected{% endif %}>all</option>
+    </select>
+  </label>
+  <button type="submit">Filter</button>
+</form>
+<form class="filters" method="post" action="/ebay/refresh">
+  <input type="hidden" name="next" value="/listings">
+  <button type="submit">Refresh from eBay</button>
+</form>
+</div>
+{% with path="/listings" %}{% include "pager.html" %}{% endwith %}
+<table>
+  <thead>
+    <tr><th></th><th>SKU</th><th>Price</th><th>Qty</th><th>Stream</th><th>Watchers</th><th>Title</th></tr>
+  </thead>
+  <tbody>
+    {% for L in listings %}
+    <tr>
+      <td class="thumb-cell">{% if L.image_url %}<a href="{{ L.url }}" target="_blank" rel="noreferrer"><img class="thumb" src="{{ L.image_url }}" alt="" referrerpolicy="no-referrer"></a>{% endif %}</td>
+      <td>{% if L.sku %}<a href="/items/{{ L.sku }}">{{ L.sku }}</a>{% else %}—{% endif %}</td>
+      <td>{% if L.price %}${{ L.price }}{% else %}—{% endif %}</td>
+      <td>{{ L.qty }}</td>
+      <td>{{ L.stream }}</td>
+      <td>{{ L.watchers }}</td>
+      <td><a href="{{ L.url }}" target="_blank" rel="noreferrer">{{ L.title }}</a></td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% with path="/listings" %}{% include "pager.html" %}{% endwith %}
+{% endblock %}

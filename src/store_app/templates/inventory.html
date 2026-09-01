@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% block body %}
+<h1>Inventory</h1>
+<p class="muted">{{ total }} matching · page {{ page }} of {{ pages }}</p>
+{% if ok %}<p class="banner ok">{{ ok }}</p>{% endif %}
+{% if err %}<p class="banner err">{{ err }}</p>{% endif %}
+
+<form class="filters" method="get" action="/inventory">
+  <label>Search
+    <input type="search" name="q" value="{{ q }}" placeholder="SKU, title, location">
+  </label>
+  <label>Category
+    <select name="category">
+      <option value="">any</option>
+      {% for c in categories %}
+      <option value="{{ c }}" {% if c == category %}selected{% endif %}>{{ c }}</option>
+      {% endfor %}
+    </select>
+  </label>
+  <label>Status
+    <select name="status">
+      <option value="">not removed</option>
+      {% for s in statuses %}
+      <option value="{{ s }}" {% if s == status %}selected{% endif %}>{{ s }}</option>
+      {% endfor %}
+    </select>
+  </label>
+  <button type="submit">Filter</button>
+</form>
+
+<h2>Add item</h2>
+<form class="stack" method="post" action="/inventory">
+  <label>SKU <input name="sku" required maxlength="64" placeholder="BE-021"></label>
+  <label>Title <input name="title" required maxlength="512"></label>
+  <label>Category
+    <select name="category">
+      {% for c in categories %}
+      <option value="{{ c }}">{{ c }}</option>
+      {% endfor %}
+    </select>
+  </label>
+  <label>Qty <input name="qty" value="1"></label>
+  <label>Cost <input name="cost" placeholder="8.00"></label>
+  <label>Ask <input name="ask_price" placeholder="18.00"></label>
+  <label>Location <input name="location" maxlength="128" placeholder="bin / shelf"></label>
+  <label>Notes <input name="notes"></label>
+  <button type="submit">Add</button>
+</form>
+
+{% with path="/inventory" %}{% include "pager.html" %}{% endwith %}
+<table>
+  <thead>
+    <tr><th>SKU</th><th>Ask</th><th>Cost</th><th>Qty</th><th>Category</th><th>Status</th><th>Location</th><th>Title</th></tr>
+  </thead>
+  <tbody>
+    {% for i in items %}
+    <tr>
+      <td><a href="/items/{{ i.sku }}">{{ i.sku }}</a></td>
+      <td>{% if i.ask_price %}${{ i.ask_price }}{% else %}—{% endif %}</td>
+      <td>{% if i.cost %}${{ i.cost }}{% else %}—{% endif %}</td>
+      <td>{{ i.qty }}</td>
+      <td>{{ i.category }}</td>
+      <td>{{ i.status }}</td>
+      <td>{{ i.location }}</td>
+      <td>{{ i.title }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% with path="/inventory" %}{% include "pager.html" %}{% endwith %}
+{% endblock %}

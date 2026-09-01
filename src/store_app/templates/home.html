@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block body %}
+<h1>F-Bar Garage store</h1>
+<p class="muted">Shelf inventory and live listings. Workshop parts stay in <a href="http://truenas.local:5056/">cogs</a>.</p>
+{% if ok %}<p class="banner ok">{{ ok }}</p>{% endif %}
+{% if err %}<p class="banner err">{{ err }}</p>{% endif %}
+<form class="filters" method="post" action="/ebay/refresh">
+  <input type="hidden" name="next" value="/">
+  <button type="submit">Refresh from eBay</button>
+</form>
+<div class="grid">
+  <article class="card">
+    <p class="muted">On the shelf</p>
+    <h2>{{ counts.items }} items</h2>
+    <p>On hand {{ counts.items_by_status.get('on-hand', 0) }} · listed {{ counts.items_by_status.get('listed', 0) }} · sold {{ counts.items_by_status.get('sold', 0) }}</p>
+    <p><a href="/inventory">Open inventory</a></p>
+  </article>
+  <article class="card">
+    <p class="muted">eBay listings</p>
+    <h2>{{ counts.listings_active }} active</h2>
+    <p>Fashion {{ counts.listings_by_stream.get('fashion', 0) }} · workshop {{ counts.listings_by_stream.get('workshop', 0) }} · moto {{ counts.listings_by_stream.get('moto', 0) }} · electronics {{ counts.listings_by_stream.get('electronics', 0) }}</p>
+    <p><a href="/listings">Open listings</a></p>
+  </article>
+  <article class="card">
+    <p class="muted">Orders in MySQL</p>
+    <h2>{{ counts.orders }}</h2>
+    <p>No buyer names. Workshop sold events can notify cogs later.</p>
+  </article>
+</div>
+<h2>By category</h2>
+<table>
+  <thead><tr><th>Category</th><th>Items</th></tr></thead>
+  <tbody>
+    {% for name, n in counts.items_by_category.items() %}
+    <tr><td><a href="/inventory?category={{ name }}">{{ name }}</a></td><td>{{ n }}</td></tr>
+    {% else %}
+    <tr><td colspan="2" class="muted">No items yet. Add one on Inventory or import an active-listings CSV.</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

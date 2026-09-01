@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block body %}
+<p class="muted"><a href="/inventory">Inventory</a> · {{ item.sku }}</p>
+<h1>{{ item.title }}</h1>
+{% if ok %}<p class="banner ok">{{ ok }}</p>{% endif %}
+{% if err %}<p class="banner err">{{ err }}</p>{% endif %}
+
+<form class="stack" method="post" action="/items/{{ item.sku }}">
+  <label>Title <input name="title" value="{{ item.title }}" required maxlength="512"></label>
+  <label>Category
+    <select name="category">
+      {% for c in categories %}
+      <option value="{{ c }}" {% if c == item.category %}selected{% endif %}>{{ c }}</option>
+      {% endfor %}
+    </select>
+  </label>
+  <label>Status
+    <select name="status">
+      {% for s in statuses %}
+      <option value="{{ s }}" {% if s == item.status %}selected{% endif %}>{{ s }}</option>
+      {% endfor %}
+    </select>
+  </label>
+  <label>Qty <input name="qty" value="{{ item.qty }}"></label>
+  <label>Cost <input name="cost" value="{{ item.cost }}"></label>
+  <label>Ask <input name="ask_price" value="{{ item.ask_price }}"></label>
+  <label>Location <input name="location" value="{{ item.location }}" maxlength="128"></label>
+  <label>cogs item <input name="cogs_item_id" value="{{ item.cogs_item_id }}" placeholder="workshop only"></label>
+  <label>cogs build <input name="cogs_build_id" value="{{ item.cogs_build_id }}"></label>
+  <label>Notes <textarea name="notes">{{ item.notes }}</textarea></label>
+  <button type="submit">Save</button>
+</form>
+
+{% if item.listings %}
+<h2>Listings</h2>
+<table>
+  <thead><tr><th></th><th>Item ID</th><th>Price</th><th>Qty</th><th>Status</th><th>Title</th></tr></thead>
+  <tbody>
+    {% for L in item.listings %}
+    <tr>
+      <td class="thumb-cell">{% if L.image_url %}<a href="{{ L.url }}" target="_blank" rel="noreferrer"><img class="thumb" src="{{ L.image_url }}" alt="" referrerpolicy="no-referrer"></a>{% endif %}</td>
+      <td><a href="{{ L.url }}" target="_blank" rel="noreferrer">{{ L.ebay_item_id }}</a></td>
+      <td>{% if L.price %}${{ L.price }}{% else %}—{% endif %}</td>
+      <td>{{ L.qty }}</td>
+      <td>{{ L.status }}</td>
+      <td>{{ L.title }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endif %}
+
+<h2>Remove</h2>
+<p class="muted">Deletes this shelf row. Live eBay listings are not ended.</p>
+<form class="status-form" method="post" action="/items/{{ item.sku }}/remove">
+  <label>Type REMOVE
+    <input name="confirm" autocomplete="off">
+  </label>
+  <button class="danger" type="submit">Delete item</button>
+</form>
+{% endblock %}

@@ -1,0 +1,29 @@
+# f-bargarage UI on TrueNAS. Same pattern as cogs / spamalot-builder.
+#
+# On the NAS (from this repo path):
+#   sudo docker compose up -d --build
+#
+# UI: http://truenas.local:5057/
+# MySQL is the host container mysql_server, reached via host.docker.internal.
+
+services:
+  ui:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: fbargarage-ui
+    ports:
+      - "5057:5057"
+    env_file:
+      - .env
+      - docker.env
+    environment:
+      APP_HOST: "0.0.0.0"
+      APP_PORT: "5057"
+      DB_HOST: host.docker.internal
+      DB_PORT: "3306"
+      DB_NAME: ebay_store
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+      - "truenas.local:host-gateway"
+    restart: unless-stopped
