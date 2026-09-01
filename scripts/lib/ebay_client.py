@@ -16,13 +16,20 @@ sys.path.insert(0, str(REPO_ROOT / "scripts"))
 
 from credentials import secret, set_secret  # noqa: E402
 
-USER_SCOPES = " ".join(
+READ_SCOPES = " ".join(
     [
         "https://api.ebay.com/oauth/api_scope/sell.finances",
         "https://api.ebay.com/oauth/api_scope/sell.fulfillment.readonly",
         "https://api.ebay.com/oauth/api_scope/sell.inventory.readonly",
         "https://api.ebay.com/oauth/api_scope/sell.analytics.readonly",
         "https://api.ebay.com/oauth/api_scope/sell.marketing.readonly",
+    ]
+)
+USER_SCOPES = " ".join(
+    [
+        "https://api.ebay.com/oauth/api_scope",
+        "https://api.ebay.com/oauth/api_scope/sell.inventory",
+        READ_SCOPES,
     ]
 )
 
@@ -105,23 +112,31 @@ class EbayClient:
     def refresh_user_token(self):
         refresh_token = self.config.get("EBAY_USER_REFRESH_TOKEN")
         if not refresh_token:
-            raise RuntimeError("EBAY_USER_REFRESH_TOKEN is not set. Run scripts/ebay_user_oauth.ps1 first.")
+            raise RuntimeError("EBAY_USER_REFRESH_TOKEN is not set. Run python scripts/ebay_user_oauth.py first.")
 
-        response = requests.post(
-            self.token_url,
-            headers={
-                "Authorization": self._basic_auth_header(),
-                "Content-Type": "application/x-www-form-urlencoded",
-            },
-            data={
-                "grant_type": "refresh_token",
-                "refresh_token": refresh_token,
-                "scope": USER_SCOPES,
-            },
-            timeout=60,
-        )
-        response.raise_for_status()
-        payload = response.json()
+        last_error = None
+        payload = None
+        for scopes in (USER_SCOPES, READ_SCOPES):
+            response = requests.post(
+                self.token_url,
+                headers={
+                    "Authorization": self._basic_auth_header(),
+                    "Content-Type": "application/x-www-form-urlencoded",
+                },
+                data={
+                    "grant_type": "refresh_token",
+                    "refresh_token": refresh_token,
+                    "scope": scopes,
+                },
+                timeout=60,
+            )
+            if response.ok:
+                payload = response.json()
+                break
+            last_error = response
+        if payload is None:
+            last_error.raise_for_status()
+            raise RuntimeError("eBay token refresh failed")
         access_token = payload["access_token"]
         write_secret("EBAY_USER_ACCESS_TOKEN", access_token)
         if "refresh_token" in payload:

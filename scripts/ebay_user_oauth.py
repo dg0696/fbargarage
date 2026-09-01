@@ -49,7 +49,9 @@ def main() -> None:
         body = getattr(getattr(exc, "response", None), "text", "")
         raise SystemExit(f"Token exchange failed: {exc}\n{body[:300]}") from exc
     print("User tokens saved to Windows Credential Manager.")
-    print("Next: live listings pull.")
+    print("This grant includes listing write (end / revise price and qty).")
+    print("TrueNAS UI: python scripts/store_ebay_secrets.py --export-docker")
+    print("Then: python scripts/deploy_ui.py")
 
 
 if __name__ == "__main__":

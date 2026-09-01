@@ -21,11 +21,15 @@ from store_app.store import (
     counts,
     delete_item,
     get_item,
+    get_listing,
+    mark_listing_ended,
     ping,
     query_string,
     search_items,
     search_listings,
+    update_listing_offer,
     upsert_item,
+    upsert_listing,
 )
 from store_app.streams import CATEGORIES, ITEM_STATUSES
 
@@ -44,6 +48,32 @@ def _item_or_404(sku: str) -> dict:
     if item is None:
         raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail=f"Unknown SKU {sku}")
     return item
+
+
+def _listing_or_404(ebay_item_id: str) -> dict:
+    listing = get_listing(ebay_item_id)
+    if listing is None:
+        raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail=f"Unknown listing {ebay_item_id}")
+    return listing
+
+
+def _safe_next(next_path: str, fallback: str) -> str:
+    if next_path in {"/", "/listings"} or next_path.startswith("/listings?") or next_path.startswith("/items/"):
+        if "://" in next_path or "//" in next_path[1:]:
+            return fallback
+        return next_path
+    return fallback
+
+
+def _ebay_write_error(exc: Exception) -> str:
+    text = str(exc)
+    lower = text.lower()
+    if any(word in lower for word in ("scope", "unauthorized", "insufficient", "access denied", "invalid iaf")):
+        return (
+            "eBay write access missing. Run python scripts/ebay_user_oauth.py "
+            "then python scripts/store_ebay_secrets.py --export-docker"
+        )
+    return ("eBay update failed: " + text)[:180]
 
 
 def create_app() -> FastAPI:
@@ -177,6 +207,7 @@ def create_app() -> FastAPI:
                 "statuses": ITEM_STATUSES,
                 "ok": ok,
                 "err": err,
+                "end_reasons": ("NotAvailable", "Incorrect", "LostOrBroken", "OtherListingError"),
             },
         )
 
@@ -285,6 +316,120 @@ def create_app() -> FastAPI:
                 f"{dest}?err={quote_plus('eBay refresh failed: ' + str(exc)[:180])}",
                 status_code=HTTP_303_SEE_OTHER,
             )
+
+    @app.post("/listings/{ebay_item_id}/end")
+    def listing_end(
+        ebay_item_id: str,
+        confirm: str = Form(""),
+        reason: str = Form("NotAvailable"),
+        next_path: str = Form("/listings", alias="next"),
+    ) -> RedirectResponse:
+        listing = _listing_or_404(ebay_item_id)
+        dest = _safe_next(next_path, "/listings")
+        if listing["status"] != "active":
+            return RedirectResponse(
+                f"{dest}?err={quote_plus('Listing is not active')}",
+                status_code=HTTP_303_SEE_OTHER,
+            )
+        if confirm.strip().upper() != "END":
+            return RedirectResponse(
+                f"{dest}?err={quote_plus('Type END to end the eBay listing')}",
+                status_code=HTTP_303_SEE_OTHER,
+            )
+        try:
+            from ebay_client import EbayClient
+            from trading import end_listing
+
+            end_listing(EbayClient(), ebay_item_id, reason=reason)
+            mark_listing_ended(ebay_item_id)
+        except Exception as exc:
+            return RedirectResponse(
+                f"{dest}?err={quote_plus(_ebay_write_error(exc))}",
+                status_code=HTTP_303_SEE_OTHER,
+            )
+        return RedirectResponse(
+            f"{dest}?ok={quote_plus('Ended listing ' + ebay_item_id)}",
+            status_code=HTTP_303_SEE_OTHER,
+        )
+
+    @app.post("/listings/{ebay_item_id}/revise")
+    def listing_revise(
+        ebay_item_id: str,
+        price: str = Form(""),
+        qty: str = Form(""),
+        next_path: str = Form("/listings", alias="next"),
+    ) -> RedirectResponse:
+        listing = _listing_or_404(ebay_item_id)
+        dest = _safe_next(next_path, "/listings")
+        if listing["status"] != "active":
+            return RedirectResponse(
+                f"{dest}?err={quote_plus('Listing is not active')}",
+                status_code=HTTP_303_SEE_OTHER,
+            )
+        try:
+            from ebay_client import EbayClient
+            from trading import revise_price_qty
+
+            revise_price_qty(EbayClient(), ebay_item_id, price=price or None, qty=qty or None)
+            update_listing_offer(ebay_item_id, price=price or None, qty=qty or None)
+        except Exception as exc:
+            return RedirectResponse(
+                f"{dest}?err={quote_plus(_ebay_write_error(exc))}",
+                status_code=HTTP_303_SEE_OTHER,
+            )
+        return RedirectResponse(
+            f"{dest}?ok={quote_plus('Updated listing ' + ebay_item_id + ' on eBay')}",
+            status_code=HTTP_303_SEE_OTHER,
+        )
+
+    @app.post("/listings/{ebay_item_id}/relist")
+    def listing_relist(
+        ebay_item_id: str,
+        confirm: str = Form(""),
+        next_path: str = Form("/listings", alias="next"),
+    ) -> RedirectResponse:
+        listing = _listing_or_404(ebay_item_id)
+        dest = _safe_next(next_path, "/listings")
+        if listing["status"] == "active":
+            return RedirectResponse(
+                f"{dest}?err={quote_plus('Listing is already active')}",
+                status_code=HTTP_303_SEE_OTHER,
+            )
+        if confirm.strip().upper() != "RELIST":
+            return RedirectResponse(
+                f"{dest}?err={quote_plus('Type RELIST to list this item again')}",
+                status_code=HTTP_303_SEE_OTHER,
+            )
+        try:
+            from ebay_client import EbayClient
+            from trading import relist_listing
+
+            new_id = relist_listing(
+                EbayClient(),
+                ebay_item_id,
+                sku=listing["sku"],
+                price=listing["price"] or None,
+                qty=listing["qty"] or 1,
+            )
+            upsert_listing(
+                ebay_item_id=new_id,
+                title=listing["title"],
+                sku=listing["sku"],
+                price=listing["price"] or None,
+                qty=listing["qty"] or 1,
+                status="active",
+                ebay_category=listing.get("ebay_category") or "",
+                image_url=listing.get("image_url") or "",
+            )
+        except Exception as exc:
+            return RedirectResponse(
+                f"{dest}?err={quote_plus(_ebay_write_error(exc))}",
+                status_code=HTTP_303_SEE_OTHER,
+            )
+        return RedirectResponse(
+            f"{dest}?ok={quote_plus('Relisted as ' + new_id)}",
+            status_code=HTTP_303_SEE_OTHER,
+        )
 
     return app
 

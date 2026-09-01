@@ -3,6 +3,7 @@
 Usage:
     python scripts/store_ebay_secrets.py
     python scripts/store_ebay_secrets.py --status
+    python scripts/store_ebay_secrets.py --export-docker
     python scripts/store_ebay_secrets.py --set EBAY_REDIRECT_URI
     python scripts/store_ebay_secrets.py --get EBAY_CLIENT_ID
 """
@@ -21,6 +22,7 @@ from credentials import (  # noqa: E402
     REPO_ROOT,
     SECRET_NAMES,
     _stored,
+    env,
     secret,
     secret_status,
     set_secret,
@@ -33,6 +35,17 @@ PROMPT_FIELDS = (
     ("EBAY_DEV_ID_PRODUCTION", "Production Dev ID"),
     ("EBAY_CLIENT_SECRET_PRODUCTION", "Production Cert ID (Client Secret)"),
     ("EBAY_REDIRECT_URI_PRODUCTION", "Production RuName (optional, Enter to skip)"),
+)
+
+DOCKER_ENV = REPO_ROOT / "docker.env"
+DOCKER_KEYS = (
+    "EBAY_USER_ACCESS_TOKEN",
+    "EBAY_USER_REFRESH_TOKEN",
+    "EBAY_USER_TOKEN_EXPIRY",
+    "EBAY_CLIENT_ID",
+    "EBAY_CLIENT_SECRET",
+    "EBAY_DEV_ID",
+    "EBAY_REDIRECT_URI",
 )
 
 
@@ -86,6 +99,48 @@ def _keep_sandbox_copy() -> None:
             set_secret(labeled, current)
 
 
+def export_docker_env() -> None:
+    """Copy WCM eBay tokens into gitignored docker.env for the TrueNAS container."""
+    existing: dict[str, str] = {}
+    order: list[tuple[str, str]] = []
+    if DOCKER_ENV.is_file():
+        for line in DOCKER_ENV.read_text(encoding="utf-8").splitlines():
+            if not line.strip() or line.lstrip().startswith("#") or "=" not in line:
+                order.append(("raw", line))
+                continue
+            key, value = line.split("=", 1)
+            existing[key.strip()] = value
+            order.append(("key", key.strip()))
+    written: list[str] = []
+    for name in DOCKER_KEYS:
+        value = secret(name)
+        if not value:
+            continue
+        existing[name] = value
+        written.append(name)
+    api_env = env("EBAY_API_ENV")
+    if api_env:
+        existing["EBAY_API_ENV"] = api_env
+        if "EBAY_API_ENV" not in written:
+            written.append("EBAY_API_ENV")
+    lines: list[str] = []
+    seen: set[str] = set()
+    for kind, payload in order:
+        if kind == "raw":
+            lines.append(payload)
+            continue
+        if payload in seen:
+            continue
+        seen.add(payload)
+        lines.append(f"{payload}={existing.get(payload, '')}")
+    for name, value in existing.items():
+        if name not in seen:
+            lines.append(f"{name}={value}")
+            seen.add(name)
+    DOCKER_ENV.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    print("updated docker.env: " + ", ".join(written))
+
+
 def prompt_production() -> None:
     _keep_sandbox_copy()
     print("Windows Credential Manager  service=fbargarage")
@@ -123,6 +178,7 @@ def main() -> None:
     parser.add_argument("--from-env", action="store_true", help="Copy non-empty .env secrets into keyring.")
     parser.add_argument("--from-token-file", action="store_true", help="Import Cloudflare verification token file.")
     parser.add_argument("--clear-env", action="store_true", help="Blank secret values in .env after storing.")
+    parser.add_argument("--export-docker", action="store_true", help="Copy WCM eBay tokens into docker.env.")
     parser.add_argument("--get", metavar="NAME", help="Print one secret (for scripts).")
     parser.add_argument("--set", metavar="NAME", dest="set_name", help="Read secret value from stdin.")
     args = parser.parse_args()
@@ -141,7 +197,11 @@ def main() -> None:
         _store_named(args.set_name, value)
         return
 
-    flagged = args.status or args.from_env or args.from_token_file or args.clear_env
+    flagged = args.status or args.from_env or args.from_token_file or args.clear_env or args.export_docker
+    if args.export_docker:
+        export_docker_env()
+        if not (args.status or args.from_env or args.from_token_file or args.clear_env):
+            return
     if args.prompt or not flagged:
         prompt_production()
         return
