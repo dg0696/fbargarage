@@ -4,7 +4,7 @@
 **Audiences:** developer, operations  
 **Status:** Active  
 **Doc-reviewed:** 2026-09-01  
-**Summary:** FastAPI UI on `:5057` reads and writes MySQL `ebay_store`, and can end, revise, and relist Seller Hub listings.
+**Summary:** FastAPI UI on `:5057` reads and writes MySQL `ebay_store`, can end/revise/relist Seller Hub listings, and shows monthly SQLite reports.
 
 ---
 
@@ -29,6 +29,7 @@ Copy **cogs**, not Resume-Builder. Apache is static httpd with no PHP.
 | Inventory | Search, add, edit, delete shelf rows; First / Previous / page numbers / Next / Last |
 | Item | Qty, cost, location, cogs IDs, linked listings; **Update on eBay** price/qty; **End listing**; **Relist** |
 | Listings | Active eBay rows with the same table pager; **End**; ended rows **Relist**; **Refresh from eBay** pulls listings and 2026 orders |
+| Reports | Monthly all-orders and SKU G text, same as `run_monthly_reports.py --from-db` |
 
 ## LAN API (cogs)
 

@@ -26,4 +26,7 @@ services:
     extra_hosts:
       - "host.docker.internal:host-gateway"
       - "truenas.local:host-gateway"
+    volumes:
+      - ./db/ebay_store.db:/app/db/ebay_store.db
+      - ./reports:/app/reports
     restart: unless-stopped

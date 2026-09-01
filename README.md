@@ -4,7 +4,7 @@
 **Audiences:** developer, operations, manager  
 **Status:** Active  
 **Doc-reviewed:** 2026-09-01  
-**Summary:** This repo is the primary f-bargarage store project. Financial reports still run from SQLite. Shelf inventory and listings live in MySQL and a LAN UI on `:5057`, including end, revise, and relist.
+**Summary:** This repo is the primary f-bargarage store project. Financial reports run from SQLite and show on the LAN UI. Shelf inventory and listings live in MySQL on `:5057`, including end, revise, and relist.
 
 ---
 
@@ -46,7 +46,7 @@ If `.env` is missing, copy `.env.example` and fill Production keys from [develop
 python scripts/db/sync_ebay.py --month 2026-08
 ```
 
-See [docs/REPORTING.md](docs/REPORTING.md) for the monthly workflow and [docs/DATA_STRUCTURE.md](docs/DATA_STRUCTURE.md) for CSV layouts.
+See [docs/REPORTING.md](docs/REPORTING.md) for the monthly workflow and [docs/DATA_STRUCTURE.md](docs/DATA_STRUCTURE.md) for CSV layouts. On the LAN UI, [Reports](http://truenas.local:5057/reports) shows the same generated files.
 
 ## LAN inventory
 

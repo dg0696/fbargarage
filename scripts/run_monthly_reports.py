@@ -98,13 +98,15 @@ def run_csv_reports(financials_dir, year, month, sku_prefix):
 def run_db_reports(year, month, sku_prefix, db_path):
     ym = f"{year:04d}-{month:02d}"
     missing = []
+    reports_dir = REPO_ROOT / "reports"
+    reports_dir.mkdir(parents=True, exist_ok=True)
 
     generate_sku_transaction_report(
         year,
         month,
         sku_prefix=sku_prefix,
-        output_file=f"reports/sku_{sku_prefix}_{ym}_report.txt",
-        export_csv=f"reports/sku_{sku_prefix}_{ym}_data.csv",
+        output_file=str(reports_dir / f"sku_{sku_prefix}_{ym}_report.txt"),
+        export_csv=str(reports_dir / f"sku_{sku_prefix}_{ym}_data.csv"),
         db_path=db_path,
     )
 
