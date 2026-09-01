@@ -34,7 +34,7 @@
 {% with path="/listings" %}{% include "pager.html" %}{% endwith %}
 <table>
   <thead>
-    <tr><th></th><th>SKU</th><th>Price</th><th>Qty</th><th>Stream</th><th>Watchers</th><th>Title</th></tr>
+    <tr><th></th><th>SKU</th><th>Price</th><th>Qty</th><th>Stream</th><th>Watchers</th><th>Title</th><th></th></tr>
   </thead>
   <tbody>
     {% for L in listings %}
@@ -46,6 +46,21 @@
       <td>{{ L.stream }}</td>
       <td>{{ L.watchers }}</td>
       <td><a href="{{ L.url }}" target="_blank" rel="noreferrer">{{ L.title }}</a></td>
+      <td>
+        {% if L.status == 'active' %}
+        <form class="row-actions" method="post" action="/listings/{{ L.ebay_item_id }}/end" onsubmit="return confirm('End this eBay listing? It will come down immediately.');">
+          <input type="hidden" name="next" value="/listings?{{ query }}{% if query %}&amp;{% endif %}page={{ page }}">
+          <input type="hidden" name="confirm" value="END">
+          <button class="danger" type="submit">End</button>
+        </form>
+        {% elif L.status == 'ended' %}
+        <form class="row-actions" method="post" action="/listings/{{ L.ebay_item_id }}/relist" onsubmit="return confirm('Relist this item on eBay? A new listing will go live.');">
+          <input type="hidden" name="next" value="/listings?{{ query }}{% if query %}&amp;{% endif %}page={{ page }}">
+          <input type="hidden" name="confirm" value="RELIST">
+          <button type="submit">Relist</button>
+        </form>
+        {% endif %}
+      </td>
     </tr>
     {% endfor %}
   </tbody>

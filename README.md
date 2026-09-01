@@ -3,8 +3,8 @@
 **Audience:** Developer (primary); Operations, Manager (secondary)  
 **Audiences:** developer, operations, manager  
 **Status:** Active  
-**Doc-reviewed:** 2026-08-31  
-**Summary:** This repo is the primary f-bargarage store project. Financial reports still run from SQLite. Shelf inventory and listings live in MySQL and a LAN UI on `:5057`.
+**Doc-reviewed:** 2026-09-01  
+**Summary:** This repo is the primary f-bargarage store project. Financial reports still run from SQLite. Shelf inventory and listings live in MySQL and a LAN UI on `:5057`, including end, revise, and relist.
 
 ---
 
@@ -52,7 +52,7 @@ See [docs/REPORTING.md](docs/REPORTING.md) for the monthly workflow and [docs/DA
 
 FastAPI + Docker on **`:5057`**, MySQL `ebay_store`. Apache `:8080` is a static card only. Cogs reads `GET /health`, `/api/listings`, `/api/orders`.
 
-Add and remove shelf items in the UI. Refresh listings with `python scripts/import_listings_csv.py` after you drop a new eBay active-listings export in `financials/f-bargarage/`. Ending a live eBay listing from the app is not built yet.
+Add and remove shelf items in the UI. End a live listing from Listings or Item (type END on the item page). Relist an ended listing from Listings (ended filter) or Item (type RELIST). Change price and qty on the Item page with **Update on eBay**.
 
 See [docs/technical/app.md](docs/technical/app.md).
 

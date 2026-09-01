@@ -3,8 +3,8 @@
 **Audience:** Developer (primary); Manager (secondary)  
 **Audiences:** developer, manager  
 **Status:** Active  
-**Doc-reviewed:** 2026-08-31  
-**Summary:** Version history for the f-bargarage store repo, from financial reports through the LAN inventory UI.
+**Doc-reviewed:** 2026-09-01  
+**Summary:** Version history for the f-bargarage store repo, including LAN listing end/revise/relist.
 
 ---
 
@@ -14,6 +14,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [0.4.0] - 2026-09-01
+
+### Added
+- End a live listing from Listings or Item; revise price and qty on Item (Trading API)
+- Relist an ended listing from Listings or Item (new eBay item ID)
+- `python scripts/store_ebay_secrets.py --export-docker` copies WCM tokens into `docker.env`
+
+### Changed
+- User OAuth now requests `sell.inventory` write scope. Re-run `python scripts/ebay_user_oauth.py` once.
 
 ## [0.3.3] - 2026-08-31
 
@@ -77,7 +87,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Updated workspace configuration with Python settings, file exclusions, and extension recommendations
 
-[Unreleased]: https://github.com/dg0696/fbargarage/compare/v0.3.3...HEAD
+[Unreleased]: https://github.com/dg0696/fbargarage/compare/v0.4.0...HEAD
+[0.4.0]: https://github.com/dg0696/fbargarage/releases/tag/v0.4.0
 [0.3.3]: https://github.com/dg0696/fbargarage/releases/tag/v0.3.3
 [0.2.0]: https://github.com/dg0696/ebay-store/compare/v0.1.2...v0.2.0
 [0.1.1]: https://github.com/dg0696/ebay-store/compare/v0.1.0...v0.1.1

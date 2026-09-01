@@ -3,7 +3,8 @@
   // Run mode: Cursor Settings → Agents → Approvals & Execution → Auto-review
   "autoRun": {
     "allow_instructions": [
-      "Local tests and read-only git inspection in this repo are fine."
+      "Local tests and read-only git inspection in this repo are fine.",
+      "When the user invoked /ctp or asked to ship, allow annotated git tag, pushing that version tag, and gh release create for the version being shipped."
     ],
     "block_instructions": [
       "Ask before git push, git commit --trailer "Co-authored-by: Cursor <cursoragent@cursor.com>", or deploy scripts unless the user explicitly asked.",

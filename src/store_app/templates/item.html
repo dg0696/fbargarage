@@ -34,7 +34,7 @@
 {% if item.listings %}
 <h2>Listings</h2>
 <table>
-  <thead><tr><th></th><th>Item ID</th><th>Price</th><th>Qty</th><th>Status</th><th>Title</th></tr></thead>
+  <thead><tr><th></th><th>Item ID</th><th>Price</th><th>Qty</th><th>Status</th><th>Title</th><th>eBay</th></tr></thead>
   <tbody>
     {% for L in item.listings %}
     <tr>
@@ -44,6 +44,36 @@
       <td>{{ L.qty }}</td>
       <td>{{ L.status }}</td>
       <td>{{ L.title }}</td>
+      <td>
+        {% if L.status == 'active' %}
+        <form class="row-actions" method="post" action="/listings/{{ L.ebay_item_id }}/revise">
+          <input type="hidden" name="next" value="/items/{{ item.sku }}">
+          <label>Price <input name="price" value="{{ L.price }}" inputmode="decimal"></label>
+          <label>Qty <input name="qty" value="{{ L.qty }}" inputmode="numeric"></label>
+          <button type="submit">Update on eBay</button>
+        </form>
+        <form class="row-actions" method="post" action="/listings/{{ L.ebay_item_id }}/end">
+          <input type="hidden" name="next" value="/items/{{ item.sku }}">
+          <label>Reason
+            <select name="reason">
+              {% for r in end_reasons %}
+              <option value="{{ r }}">{{ r }}</option>
+              {% endfor %}
+            </select>
+          </label>
+          <label>Type END <input name="confirm" autocomplete="off"></label>
+          <button class="danger" type="submit">End listing</button>
+        </form>
+        {% elif L.status == 'ended' %}
+        <form class="row-actions" method="post" action="/listings/{{ L.ebay_item_id }}/relist">
+          <input type="hidden" name="next" value="/items/{{ item.sku }}">
+          <label>Type RELIST <input name="confirm" autocomplete="off"></label>
+          <button type="submit">Relist on eBay</button>
+        </form>
+        {% else %}
+        —
+        {% endif %}
+      </td>
     </tr>
     {% endfor %}
   </tbody>
@@ -51,7 +81,7 @@
 {% endif %}
 
 <h2>Remove</h2>
-<p class="muted">Deletes this shelf row. Live eBay listings are not ended.</p>
+<p class="muted">Deletes this shelf row. Live eBay listings stay up until you end them above.</p>
 <form class="status-form" method="post" action="/items/{{ item.sku }}/remove">
   <label>Type REMOVE
     <input name="confirm" autocomplete="off">

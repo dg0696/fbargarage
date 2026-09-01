@@ -3,8 +3,8 @@
 **Audience:** Developer (primary); Operations (secondary)  
 **Audiences:** developer, operations  
 **Status:** Active  
-**Doc-reviewed:** 2026-08-31  
-**Summary:** FastAPI UI on `:5057` reads and writes MySQL `ebay_store`. Apache `:8080/fbargarage/` is a static link card. Financial history stays in SQLite.
+**Doc-reviewed:** 2026-09-01  
+**Summary:** FastAPI UI on `:5057` reads and writes MySQL `ebay_store`, and can end, revise, and relist Seller Hub listings.
 
 ---
 
@@ -27,8 +27,8 @@ Copy **cogs**, not Resume-Builder. Apache is static httpd with no PHP.
 |------|-----|
 | Home | Counts by status and stream |
 | Inventory | Search, add, edit, delete shelf rows; First / Previous / page numbers / Next / Last |
-| Item | Qty, cost, location, cogs IDs, linked listings |
-| Listings | Active eBay rows with the same table pager; **Refresh from eBay** pulls listings and 2026 orders |
+| Item | Qty, cost, location, cogs IDs, linked listings; **Update on eBay** price/qty; **End listing**; **Relist** |
+| Listings | Active eBay rows with the same table pager; **End**; ended rows **Relist**; **Refresh from eBay** pulls listings and 2026 orders |
 
 ## LAN API (cogs)
 
@@ -40,8 +40,8 @@ Copy **cogs**, not Resume-Builder. Apache is static httpd with no PHP.
 ## Commands
 
 ```powershell
-python scripts/init_mysql.py
-python scripts/import_listings_csv.py
+python scripts/ebay_user_oauth.py
+python scripts/store_ebay_secrets.py --export-docker
 python scripts/sync_listings.py
 python scripts/sync_orders.py
 python scripts/serve.py
@@ -58,11 +58,13 @@ eBay Client ID/Secret, RuName, OAuth tokens, and the deletion-endpoint verificat
 ```powershell
 python scripts/store_ebay_secrets.py
 python scripts/store_ebay_secrets.py --status
+python scripts/ebay_user_oauth.py
+python scripts/store_ebay_secrets.py --export-docker
 ```
 
-The first command prompts you to paste Production App ID, Dev ID, and Cert ID. Sandbox keys already in WCM are kept as `*_SANDBOX`.
+The first command prompts you to paste Production App ID, Dev ID, and Cert ID. Sandbox keys already in WCM are kept as `*_SANDBOX`. User OAuth must include **sell.inventory** (write) for End / revise — enable that scope on the eBay app if consent fails.
 
-`.env` may keep `EBAY_API_ENV` and MySQL host names. Docker on TrueNAS still uses `docker.env` for `DB_PASSWORD` only.
+`.env` may keep `EBAY_API_ENV` and MySQL host names. Docker on TrueNAS uses `docker.env` for `DB_PASSWORD` and eBay tokens.
 
 ## eBay Production unlock
 

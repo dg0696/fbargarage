@@ -508,6 +508,75 @@ def get_listing_by_sku(sku: str) -> Optional[dict[str, Any]]:
     return rows[0] if rows else None
 
 
+def get_listing(ebay_item_id: str) -> Optional[dict[str, Any]]:
+    item_id = str(ebay_item_id).strip()
+    if not item_id:
+        return None
+    with _conn() as conn:
+        cur = conn.cursor()
+        cur.execute(
+            """
+            SELECT ebay_item_id, sku, title, price, qty, stream, status, url,
+                   image_url, ebay_category
+            FROM listings WHERE ebay_item_id = %s
+            """,
+            (item_id,),
+        )
+        row = cur.fetchone()
+        cur.close()
+    if row is None:
+        return None
+    return {
+        "ebay_item_id": row[0],
+        "sku": row[1] or "",
+        "title": row[2],
+        "price": _money(row[3]),
+        "qty": row[4],
+        "stream": row[5],
+        "status": row[6],
+        "url": row[7] or f"https://www.ebay.com/itm/{row[0]}",
+        "image_url": row[8] or "",
+        "ebay_category": row[9] or "",
+    }
+
+
+def mark_listing_ended(ebay_item_id: str) -> None:
+    with _conn() as conn:
+        cur = conn.cursor()
+        cur.execute(
+            """
+            UPDATE listings
+            SET status = 'ended', synced_at = NOW()
+            WHERE ebay_item_id = %s
+            """,
+            (str(ebay_item_id).strip(),),
+        )
+        conn.commit()
+        cur.close()
+
+
+def update_listing_offer(ebay_item_id: str, *, price: Any = None, qty: Any = None) -> None:
+    fields: list[str] = ["synced_at = NOW()"]
+    args: list[Any] = []
+    if price not in (None, ""):
+        fields.append("price = %s")
+        args.append(_dec(price))
+    if qty not in (None, ""):
+        fields.append("qty = %s")
+        args.append(int(Decimal(str(qty))))
+    if len(args) == 0:
+        return
+    args.append(str(ebay_item_id).strip())
+    with _conn() as conn:
+        cur = conn.cursor()
+        cur.execute(
+            f"UPDATE listings SET {', '.join(fields)} WHERE ebay_item_id = %s",
+            args,
+        )
+        conn.commit()
+        cur.close()
+
+
 def upsert_order(
     *,
     order_id: str,

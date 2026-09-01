@@ -98,6 +98,15 @@ button, .btn {
   cursor: pointer;
 }
 button.danger { background: var(--err); color: #fff; }
+.row-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: end;
+  margin: 0;
+}
+.row-actions input { width: 6em; }
+.row-actions button { white-space: nowrap; }
 footer { padding: 16px 24px; color: var(--muted); font-size: 12px; }
 .pager {
   display: flex;
