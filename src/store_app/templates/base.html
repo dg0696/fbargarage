@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ title }} — f-bargarage</title>
+  <link rel="stylesheet" href="/static/app.css">
+</head>
+<body>
+  <header>
+    <strong>f-bargarage</strong>
+    <nav>
+      <a href="/" class="{% if nav == 'home' %}active{% endif %}">Home</a>
+      <a href="/inventory" class="{% if nav == 'inventory' %}active{% endif %}">Inventory</a>
+      <a href="/listings" class="{% if nav == 'listings' %}active{% endif %}">Listings</a>
+    </nav>
+  </header>
+  <main>
+    {% block body %}{% endblock %}
+  </main>
+  <footer>v{{ version }} · LAN store · eBay stays the sales channel</footer>
+</body>
+</html>

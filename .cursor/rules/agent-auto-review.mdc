@@ -1,0 +1,54 @@
+---
+description: Cursor Auto-review run mode — steer via permissions.json autoRun, not broad terminal allowlists.
+alwaysApply: true
+---
+
+# Cursor Auto-review (agent execution)
+
+This workspace uses **Auto-review** run mode (not Allowlist).
+
+**Enable:** Cursor Settings → **Agents → Approvals & Execution → Auto-review**
+
+## How it works
+
+Shell, MCP, and Fetch calls are evaluated in order:
+
+1. **Allowlist match** (`terminalAllowlist` / `mcpAllowlist` in `permissions.json`) → runs immediately
+2. **Sandbox** → runs in sandbox when supported
+3. **Classifier** → reads `autoRun` instructions → allow, block, or ask for approval
+
+Prefer **`autoRun` steering** over growing the allowlist. Keep `terminalAllowlist` small (read-only fast paths only).
+
+## File locations
+
+| File | Purpose |
+|------|---------|
+| `~/.cursor/permissions.json` | Per-user config (Windows: `%USERPROFILE%\.cursor\permissions.json`) |
+| `.cursor/permissions.json` | Per-repo guardrails (concatenated with user file; commit this) |
+
+Both are JSONC. Cursor reloads on save; suggest **Reload Window** once if behavior does not update.
+
+Docs: https://cursor.com/docs/reference/permissions
+
+## When a command is blocked or needs approval
+
+1. **Do not** add broad command prefixes to `terminalAllowlist` by default.
+2. If the user **explicitly** wants a recurring command class to auto-run, add a **narrow** allowlist entry or an `allow_instructions` sentence — not whole tool families (e.g. not bare `git` or `gh`).
+3. If the classifier should prompt next time, add or refine a `block_instructions` entry in the user and/or repo `permissions.json`.
+4. Preserve existing comments and keys when editing; do not duplicate entries.
+
+## Repo guardrails (classifier hints)
+
+**Lean toward prompt** before:
+
+- Deploy scripts unless the user said build/deploy
+- `git commit --trailer "Co-authored-by: Cursor <cursoragent@cursor.com>"`, `git push` unless the user asked to commit or push
+- `git push --force`, `git reset --hard`, `git clean`, or `--no-verify`
+- Broad deletes (`rm -rf`, `Remove-Item -Recurse`) or production writes with `--apply` flags
+
+**Lean toward allow** for read-only inspection and local dev:
+
+- `git status`, `git diff`, `git log`
+- Local tests and builds in this repo
+
+When the user says to **allow** a blocked command permanently, update `permissions.json` steering — do not only tell them to click Approve in the UI.

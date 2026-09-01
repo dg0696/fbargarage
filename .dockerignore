@@ -1,0 +1,15 @@
+.git
+.venv
+venv
+.env
+docker.env
+financials
+reports
+logs
+__pycache__
+*.pyc
+db/*.db
+.cursor
+archive
+docs
+web

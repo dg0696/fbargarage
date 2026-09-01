@@ -1,0 +1,6 @@
+# 32–80 chars: letters, numbers, hyphen, underscore. Same value goes in the eBay portal.
+EBAY_VERIFICATION_TOKEN=replace_with_32_to_80_char_token_here
+
+# Optional. Leave blank to hash the URL eBay actually called (origin + path).
+# If validation fails on a trailing-slash mismatch, set this to the exact portal URL.
+EBAY_ENDPOINT_URL=
