@@ -243,8 +243,9 @@ def month_label(year, month):
 
 def default_paths(year, month, sku_prefix=None):
     ym = f"{year:04d}-{month:02d}"
-    base = f"reports/f-bargarage_{ym}_all-orders"
-    sku_base = f"reports/sku_{sku_prefix}_{ym}_all-orders" if sku_prefix else None
+    reports = Path(__file__).resolve().parents[1] / "reports"
+    base = str(reports / f"f-bargarage_{ym}_all-orders")
+    sku_base = str(reports / f"sku_{sku_prefix}_{ym}_all-orders") if sku_prefix else None
     return base, sku_base
 
 

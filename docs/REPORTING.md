@@ -3,8 +3,8 @@
 **Audience:** Operations (primary); Developer (secondary)  
 **Audiences:** operations, developer  
 **Status:** Active  
-**Doc-reviewed:** 2026-08-31  
-**Summary:** How to generate, validate, and print monthly f-bargarage eBay store reports from SQLite or CSV.
+**Doc-reviewed:** 2026-09-01  
+**Summary:** How to generate, validate, print, and view monthly f-bargarage eBay store reports from SQLite or CSV. The LAN UI shows the same text files.
 
 ---
 
@@ -56,7 +56,7 @@ From CSV exports (legacy path):
 python scripts/run_monthly_reports.py --year 2026 --month 6 --from-csv
 ```
 
-Reports are written to `reports/`.
+Reports are written to `reports/` and also shown on the LAN UI at [http://truenas.local:5057/reports](http://truenas.local:5057/reports) (**Generate** for a month, then open a file).
 
 ### 4. Validate CSV vs DB parity
 

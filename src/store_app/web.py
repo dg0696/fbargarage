@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import sys
-from datetime import date
+from datetime import date, timedelta
 from pathlib import Path
 from typing import Optional
 from urllib.parse import quote_plus
@@ -31,10 +31,20 @@ from store_app.store import (
     upsert_item,
     upsert_listing,
 )
+from store_app.reporting import (
+    generate_month,
+    list_months,
+    month_files,
+    read_report,
+    sqlite_ready,
+)
 from store_app.streams import CATEGORIES, ITEM_STATUSES
 
 PACKAGE_DIR = Path(__file__).resolve().parent
-_SCRIPTS = PACKAGE_DIR.parents[1] / "scripts"
+_ROOT = PACKAGE_DIR.parents[1]
+_SCRIPTS = _ROOT / "scripts"
+if str(_ROOT) not in sys.path:
+    sys.path.insert(0, str(_ROOT))
 if str(_SCRIPTS) not in sys.path:
     sys.path.insert(0, str(_SCRIPTS))
 if str(_SCRIPTS / "lib") not in sys.path:
@@ -292,6 +302,66 @@ def create_app() -> FastAPI:
                 "err": err,
                 **result,
             },
+        )
+
+    @app.get("/reports", response_class=HTMLResponse)
+    def reports_page(
+        request: Request,
+        year: int = 0,
+        month: int = 0,
+        file: str = "",
+        ok: Optional[str] = None,
+        err: Optional[str] = None,
+    ) -> HTMLResponse:
+        today = date.today()
+        if year < 1 or month < 1:
+            previous = date(today.year, today.month, 1) - timedelta(days=1)
+            year, month = previous.year, previous.month
+        body = ""
+        current_label = ""
+        if file:
+            try:
+                body = read_report(file)
+                current_label = file
+            except (ValueError, FileNotFoundError):
+                err = err or "Unknown report file"
+        return TEMPLATES.TemplateResponse(
+            request,
+            "reports.html",
+            {
+                "title": "Reports",
+                "nav": "reports",
+                "version": __version__,
+                "year": year,
+                "month": month,
+                "years": list(range(2025, today.year + 1)),
+                "months": list(range(1, 13)),
+                "files": month_files(year, month),
+                "available_months": list_months(),
+                "sqlite_ready": sqlite_ready(),
+                "body": body,
+                "current_label": current_label,
+                "ok": ok,
+                "err": err,
+            },
+        )
+
+    @app.post("/reports/generate")
+    def reports_generate(year: int = Form(...), month: int = Form(...)) -> RedirectResponse:
+        dest = f"/reports?year={year}&month={month}"
+        try:
+            missing = generate_month(year, month)
+        except Exception as exc:
+            return RedirectResponse(
+                f"{dest}&err={quote_plus(str(exc)[:180])}",
+                status_code=HTTP_303_SEE_OTHER,
+            )
+        message = f"Generated {year:04d}-{month:02d}"
+        if missing:
+            message += " — " + "; ".join(missing)
+        return RedirectResponse(
+            f"{dest}&ok={quote_plus(message)}",
+            status_code=HTTP_303_SEE_OTHER,
         )
 
     @app.post("/ebay/refresh")

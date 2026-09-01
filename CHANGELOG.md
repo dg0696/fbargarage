@@ -4,7 +4,7 @@
 **Audiences:** developer, manager  
 **Status:** Active  
 **Doc-reviewed:** 2026-09-01  
-**Summary:** Version history for the f-bargarage store repo, including LAN listing end/revise/relist.
+**Summary:** Version history for the f-bargarage store repo, including LAN listing mutations and monthly reports.
 
 ---
 
@@ -14,6 +14,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [0.4.1] - 2026-09-01
+
+### Added
+- Monthly reports page on the LAN UI (`/reports`) using the same SQLite generators as `run_monthly_reports.py --from-db`
 
 ## [0.4.0] - 2026-09-01
 
@@ -87,7 +92,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Updated workspace configuration with Python settings, file exclusions, and extension recommendations
 
-[Unreleased]: https://github.com/dg0696/fbargarage/compare/v0.4.0...HEAD
+[Unreleased]: https://github.com/dg0696/fbargarage/compare/v0.4.1...HEAD
+[0.4.1]: https://github.com/dg0696/fbargarage/releases/tag/v0.4.1
 [0.4.0]: https://github.com/dg0696/fbargarage/releases/tag/v0.4.0
 [0.3.3]: https://github.com/dg0696/fbargarage/releases/tag/v0.3.3
 [0.2.0]: https://github.com/dg0696/ebay-store/compare/v0.1.2...v0.2.0
