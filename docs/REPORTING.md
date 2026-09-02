@@ -3,7 +3,7 @@
 **Audience:** Operations (primary); Developer (secondary)  
 **Audiences:** operations, developer  
 **Status:** Active  
-**Doc-reviewed:** 2026-09-01  
+**Doc-reviewed:** 2026-09-02  
 **Summary:** How to generate, validate, print, and view monthly f-bargarage eBay store reports from SQLite or CSV. The LAN UI shows the same text files.
 
 ---
@@ -81,6 +81,8 @@ Total Price: USD X.XX
 ```
 
 SKU transaction summaries include item-level fee breakdowns and an overall financial summary with gross revenue, fees, net amount, and payout (70% of net profit).
+
+For motorcycle parts, **Net** to pay is that 70% figure. Sold GB/GC payouts are recorded as current in [operations/moto-payouts.md](operations/moto-payouts.md).
 
 ## Printing Reports (Windows)
 

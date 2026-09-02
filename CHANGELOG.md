@@ -3,7 +3,7 @@
 **Audience:** Developer (primary); Manager (secondary)  
 **Audiences:** developer, manager  
 **Status:** Active  
-**Doc-reviewed:** 2026-09-01  
+**Doc-reviewed:** 2026-09-02  
 **Summary:** Version history for the f-bargarage store repo, including LAN listing mutations and monthly reports.
 
 ---
@@ -14,6 +14,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+### Added
+- Operations note that sold motorcycle parts (GB/GC) payouts are current as of 2026-09-02
 
 ## [0.4.1] - 2026-09-01
 
