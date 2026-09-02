@@ -3,7 +3,7 @@
 **Audience:** Everyone  
 **Audiences:** everyone  
 **Status:** Active  
-**Doc-reviewed:** 2026-09-01  
+**Doc-reviewed:** 2026-09-02  
 **Summary:** Index of F-Bar Garage store docs. Start with the root README, then reporting if you need this month’s numbers.
 
 ---
@@ -12,6 +12,7 @@
 |------|------------------|-----|
 | [../README.md](../README.md) | Developer | What this repo is and how to run it |
 | [REPORTING.md](REPORTING.md) | Operations | Monthly reports, API sync, print |
+| [operations/moto-payouts.md](operations/moto-payouts.md) | Operations | Sold motorcycle-parts payout status |
 | [DATA_STRUCTURE.md](DATA_STRUCTURE.md) | Developer | CSV layouts and SQLite tables |
 | [ARCHIVING.md](ARCHIVING.md) | Operations | Move old reports and docs |
 | [GIT_WORKFLOW.md](GIT_WORKFLOW.md) | Developer | Historical commit style; ship with `/ctp` |
