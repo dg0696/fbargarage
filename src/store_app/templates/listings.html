@@ -26,44 +26,71 @@
   </label>
   <button type="submit">Filter</button>
 </form>
-<form class="filters" method="post" action="/ebay/refresh">
+<form class="filters" method="post" action="/ebay/refresh" data-refresh>
   <input type="hidden" name="next" value="/listings">
   <button type="submit">Refresh from eBay</button>
 </form>
 </div>
 {% with path="/listings" %}{% include "pager.html" %}{% endwith %}
-<table>
-  <thead>
-    <tr><th></th><th>SKU</th><th>Price</th><th>Qty</th><th>Stream</th><th>Watchers</th><th>Title</th><th></th></tr>
-  </thead>
-  <tbody>
-    {% for L in listings %}
-    <tr>
-      <td class="thumb-cell">{% if L.image_url %}<a href="{{ L.url }}" target="_blank" rel="noreferrer"><img class="thumb" src="{{ L.image_url }}" alt="" referrerpolicy="no-referrer"></a>{% endif %}</td>
-      <td>{% if L.sku %}<a href="/items/{{ L.sku }}">{{ L.sku }}</a>{% else %}—{% endif %}</td>
-      <td>{% if L.price %}${{ L.price }}{% else %}—{% endif %}</td>
-      <td>{{ L.qty }}</td>
-      <td>{{ L.stream }}</td>
-      <td>{{ L.watchers }}</td>
-      <td><a href="{{ L.url }}" target="_blank" rel="noreferrer">{{ L.title }}</a></td>
-      <td>
-        {% if L.status == 'active' %}
-        <form class="row-actions" method="post" action="/listings/{{ L.ebay_item_id }}/end" onsubmit="return confirm('End this eBay listing? It will come down immediately.');">
-          <input type="hidden" name="next" value="/listings?{{ query }}{% if query %}&amp;{% endif %}page={{ page }}">
-          <input type="hidden" name="confirm" value="END">
-          <button class="danger" type="submit">End</button>
-        </form>
-        {% elif L.status == 'ended' %}
-        <form class="row-actions" method="post" action="/listings/{{ L.ebay_item_id }}/relist" onsubmit="return confirm('Relist this item on eBay? A new listing will go live.');">
-          <input type="hidden" name="next" value="/listings?{{ query }}{% if query %}&amp;{% endif %}page={{ page }}">
-          <input type="hidden" name="confirm" value="RELIST">
-          <button type="submit">Relist</button>
-        </form>
-        {% endif %}
-      </td>
-    </tr>
-    {% endfor %}
-  </tbody>
-</table>
+<form id="listings-batch" class="batch-form" method="post" action="/listings/batch" data-batch>
+  <input type="hidden" name="next" value="/listings?{{ query }}{% if query %}&amp;{% endif %}page={{ page }}">
+  <div class="batch-bar">
+    <label>Action
+      <select name="action">
+        <option value="end">End selected</option>
+        <option value="relist">Relist selected</option>
+      </select>
+    </label>
+    <label>End reason
+      <select name="reason">
+        {% for r in end_reasons %}
+        <option value="{{ r }}">{{ r }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <button type="submit">Apply to selected</button>
+  </div>
+</form>
+  <table>
+    <thead>
+      <tr>
+        <th class="check-cell"><input type="checkbox" form="listings-batch" data-select-all aria-label="Select all"></th>
+        <th></th><th class="sku-cell">SKU</th><th>Price</th><th>Qty</th><th>Stream</th><th>Status</th><th>Watchers</th><th>Title</th><th></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for L in listings %}
+      <tr>
+        <td class="check-cell"><input type="checkbox" form="listings-batch" name="ebay_item_id" value="{{ L.ebay_item_id }}"></td>
+        <td class="thumb-cell">{% if L.image_url %}<a href="{{ L.url }}" target="_blank" rel="noreferrer"><img class="thumb" src="{{ L.image_url }}" alt="" referrerpolicy="no-referrer"></a>{% endif %}</td>
+        <td class="sku-cell">{% if L.sku %}<a href="/items/{{ L.sku }}">{{ L.sku }}</a>{% else %}—{% endif %}</td>
+        <td>{% if L.price %}${{ L.price }}{% else %}—{% endif %}</td>
+        <td>{{ L.qty }}</td>
+        <td>{{ L.stream }}</td>
+        <td>{{ L.status }}</td>
+        <td>{{ L.watchers }}</td>
+        <td><a href="{{ L.url }}" target="_blank" rel="noreferrer">{{ L.title }}</a></td>
+        <td>
+          {% if L.status == 'active' %}
+          <form class="row-actions" method="post" action="/listings/{{ L.ebay_item_id }}/end" onsubmit="return confirm('End this eBay listing? It will come down immediately.');">
+            <input type="hidden" name="next" value="/listings?{{ query }}{% if query %}&amp;{% endif %}page={{ page }}">
+            <input type="hidden" name="confirm" value="END">
+            <button class="danger" type="submit">End</button>
+          </form>
+          {% elif L.status == 'ended' %}
+          <form class="row-actions" method="post" action="/listings/{{ L.ebay_item_id }}/relist" onsubmit="return confirm('Relist this item on eBay? A new listing will go live.');">
+            <input type="hidden" name="next" value="/listings?{{ query }}{% if query %}&amp;{% endif %}page={{ page }}">
+            <input type="hidden" name="confirm" value="RELIST">
+            <button type="submit">Relist</button>
+          </form>
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
 {% with path="/listings" %}{% include "pager.html" %}{% endwith %}
+{% endblock %}
+{% block scripts %}
+<script src="/static/batch.js"></script>
 {% endblock %}

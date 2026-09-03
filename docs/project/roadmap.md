@@ -3,8 +3,8 @@
 **Audience:** Program manager (primary); Manager, Developer (secondary)  
 **Audiences:** program-manager, manager, developer  
 **Status:** Active  
-**Doc-reviewed:** 2026-09-01  
-**Summary:** Financial pipeline is here. LAN UI can end, revise, and relist. Keep `Z:\gitrepos\ebay-store` as backup.
+**Doc-reviewed:** 2026-09-03  
+**Summary:** Financial pipeline is here. LAN UI can add listing drafts with photos, suggest from eBay/AI, list, end, revise, or relist, and refresh only changed eBay rows. Keep `Z:\gitrepos\ebay-store` as backup.
 
 ---
 
@@ -15,7 +15,7 @@
 | **Retire ebay-store** | Later, when you say so |
 | **LAN UI** | FastAPI + Docker on `:5057`; MySQL `ebay_store`; Apache card `/fbargarage/` |
 | **Cogs handshake** | `GET /health`, `/api/listings`, `/api/orders` as in cogs `docs/technical/ebay-store.md` |
-| **Mutate eBay** | End, revise price/qty, and relist from the LAN UI. Create a brand-new listing is later. |
+| **Mutate eBay** | End, revise price/qty, relist, and create a listing from a new inventory item (photos + fields + eBay/AI suggest) |
 
 ## Related
 

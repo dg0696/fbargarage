@@ -13,7 +13,16 @@ CATEGORIES = (
 )
 
 ITEM_STATUSES = ("on-hand", "listed", "sold", "removed")
+INVENTORY_FILTERS = (
+    ("available", "active or not posted"),
+    ("on-hand", "not posted"),
+    ("listed", "active"),
+    ("sold", "sold"),
+    ("removed", "removed"),
+    ("all", "all"),
+)
 LISTING_STATUSES = ("active", "ended", "all")
+AVAILABLE_STATUSES = ("on-hand", "listed")
 
 _FASHION = {"BA", "BB", "BC", "BD", "BE", "BF", "BG", "BH", "BI", "BJ", "BK", "BL"}
 _ELECTRONICS = {"AA", "AB", "AC", "AD", "AE"}

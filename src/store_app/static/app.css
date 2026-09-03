@@ -58,6 +58,18 @@ table { width: 100%; border-collapse: collapse; margin-top: 12px; }
 th, td { text-align: left; padding: 8px 6px; border-bottom: 1px solid var(--line); vertical-align: top; }
 th { color: var(--muted); font-weight: 600; font-size: 13px; }
 .thumb-cell { width: 64px; }
+.check-cell { width: 28px; }
+.sku-cell { width: 8em; white-space: nowrap; }
+.action-cell { width: 7em; white-space: nowrap; }
+.action-cell .btn { display: inline-block; padding: 7px 12px; }
+.batch-form { margin: 0; }
+.batch-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: end;
+  margin: 12px 0;
+}
 .thumb {
   width: 56px;
   height: 56px;
@@ -80,6 +92,36 @@ form.stack, form.filters, form.status-form {
   margin: 12px 0;
 }
 form.stack { max-width: 720px; }
+form.listing-form { max-width: 880px; }
+form.listing-form label.wide { flex: 1 1 100%; }
+form.listing-form textarea { min-height: 140px; width: 100%; }
+.form-actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+label.check { flex-direction: row; align-items: center; gap: 8px; }
+.photo-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin: 12px 0;
+}
+.photo-grid figure { margin: 0; }
+.photo-grid img {
+  width: 160px;
+  height: 160px;
+  object-fit: cover;
+  border: 1px solid var(--line);
+  display: block;
+  background: var(--panel);
+}
+.photo-grid form { margin-top: 6px; }
+table.specifics { max-width: 720px; margin: 12px 0 20px; }
+table.specifics th {
+  width: 34%;
+  text-align: left;
+  font-weight: 600;
+  color: var(--muted);
+  vertical-align: top;
+}
+.comp-list { margin: 0; padding-left: 18px; }
 label { display: flex; flex-direction: column; gap: 4px; font-size: 12px; color: var(--muted); }
 input, select, textarea {
   background: var(--bg);

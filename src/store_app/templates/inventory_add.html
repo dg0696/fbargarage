@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block body %}
+<h1>Add to inventory</h1>
+<p class="muted">Photos and listing fields stay with the shelf SKU. Use Suggest to fill from photos and matching eBay listings, then save. Optional: list on eBay after save.</p>
+{% if ok %}<p class="banner ok">{{ ok }}</p>{% endif %}
+{% if err %}<p class="banner err">{{ err }}</p>{% endif %}
+
+<form class="stack listing-form" method="post" action="/inventory/add" enctype="multipart/form-data" data-listing-assist>
+  <label>SKU <input name="sku" required maxlength="64" placeholder="BE-021"></label>
+  <label>Title <input name="title" required maxlength="80" placeholder="eBay title, 80 characters"></label>
+  <label>Category
+    <select name="category">
+      {% for c in categories %}
+      <option value="{{ c }}">{{ c }}</option>
+      {% endfor %}
+    </select>
+  </label>
+  <label>Condition
+    <select name="condition_id">
+      {% for code, label in conditions %}
+      <option value="{{ code }}" {% if code == '3000' %}selected{% endif %}>{{ label }}</option>
+      {% endfor %}
+    </select>
+  </label>
+  <label>Qty <input name="qty" value="1"></label>
+  <label>Cost <input name="cost" placeholder="8.00"></label>
+  <label>Ask <input name="ask_price" placeholder="18.00"></label>
+  <label>Brand <input name="brand" maxlength="128" placeholder="BMW or Unbranded"></label>
+  <label>Location <input name="location" maxlength="128" placeholder="bin / shelf"></label>
+  <label class="wide">Notes <input name="notes" placeholder="internal only"></label>
+  <label class="wide">Description
+    <textarea name="description" maxlength="40000" placeholder="Listing description"></textarea>
+  </label>
+  <label>eBay category ID <input name="ebay_category_id" maxlength="32" placeholder="filled by Suggest"></label>
+  <label class="wide">eBay category <input name="ebay_category_name" maxlength="128"></label>
+  <label class="wide">Photos
+    <input type="file" name="photos" accept="image/jpeg,image/png,image/webp,image/gif" multiple>
+  </label>
+  <div class="form-actions">
+    <button type="button" data-suggest>Suggest from photos and eBay</button>
+    <button type="submit">Add to inventory</button>
+  </div>
+  <label class="check">
+    <input type="checkbox" name="list_now" value="1">
+    Also list on eBay after save
+  </label>
+  <p class="muted" data-suggest-status></p>
+  <div data-comps></div>
+</form>
+{% endblock %}
+{% block scripts %}
+<script src="/static/listing-assist.js"></script>
+{% endblock %}

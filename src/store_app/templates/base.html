@@ -12,6 +12,7 @@
     <nav>
       <a href="/" class="{% if nav == 'home' %}active{% endif %}">Home</a>
       <a href="/inventory" class="{% if nav == 'inventory' %}active{% endif %}">Inventory</a>
+      <a href="/inventory/add" class="{% if nav == 'add' %}active{% endif %}">Add to inventory</a>
       <a href="/listings" class="{% if nav == 'listings' %}active{% endif %}">Listings</a>
       <a href="/reports" class="{% if nav == 'reports' %}active{% endif %}">Reports</a>
     </nav>
@@ -20,5 +21,17 @@
     {% block body %}{% endblock %}
   </main>
   <footer>v{{ version }} · LAN store · eBay stays the sales channel</footer>
+  <script>
+    document.querySelectorAll("[data-refresh]").forEach((form) => {
+      form.addEventListener("submit", () => {
+        const button = form.querySelector("button");
+        if (button) {
+          button.disabled = true;
+          button.textContent = "Refreshing…";
+        }
+      });
+    });
+  </script>
+  {% block scripts %}{% endblock %}
 </body>
 </html>

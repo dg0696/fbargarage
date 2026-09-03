@@ -48,5 +48,7 @@ financials/* (1).pdf
 # Public GitHub repo: seller CSVs, account HTML, and generated reports stay local
 /financials/
 /reports/
+/data/item_photos/*
+!/data/item_photos/.gitkeep
 
 archive/manifests/
