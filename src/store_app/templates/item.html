@@ -5,8 +5,42 @@
 {% if ok %}<p class="banner ok">{{ ok }}</p>{% endif %}
 {% if err %}<p class="banner err">{{ err }}</p>{% endif %}
 
-<form class="stack" method="post" action="/items/{{ item.sku }}">
-  <label>Title <input name="title" value="{{ item.title }}" required maxlength="512"></label>
+{% if item.photos %}
+<div class="photo-grid">
+  {% for photo in item.photos %}
+  <figure>
+    <img src="{{ photo.url }}" alt="">
+    <form method="post" action="/items/{{ item.sku }}/photos/{{ photo.id }}/delete">
+      <button class="danger" type="submit">Remove</button>
+    </form>
+  </figure>
+  {% endfor %}
+</div>
+{% endif %}
+
+{% if item.listings %}
+<form class="status-form" method="post" action="/items/{{ item.sku }}/ebay-pull">
+  <button type="submit">Pull fields and photos from eBay</button>
+</form>
+<p class="muted">Copies description, extra photos, and item specifics (manufacturer, model, colors, case size, band width, wrist size, and the rest) from the live listing.</p>
+{% endif %}
+
+{% if item.item_specifics %}
+<h2>eBay item specifics</h2>
+<table class="specifics">
+  <tbody>
+    {% for row in item.item_specifics %}
+    <tr>
+      <th>{{ row.name }}</th>
+      <td>{{ row.values | join(", ") }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endif %}
+
+<form class="stack listing-form" method="post" action="/items/{{ item.sku }}" enctype="multipart/form-data" data-listing-assist>
+  <label>Title <input name="title" value="{{ item.title }}" required maxlength="80"></label>
   <label>Category
     <select name="category">
       {% for c in categories %}
@@ -21,15 +55,56 @@
       {% endfor %}
     </select>
   </label>
+  <label>Condition
+    <select name="condition_id">
+      {% for code, label in conditions %}
+      <option value="{{ code }}" {% if code == item.condition_id %}selected{% endif %}>{{ label }}</option>
+      {% endfor %}
+    </select>
+  </label>
   <label>Qty <input name="qty" value="{{ item.qty }}"></label>
   <label>Cost <input name="cost" value="{{ item.cost }}"></label>
   <label>Ask <input name="ask_price" value="{{ item.ask_price }}"></label>
+  <label>Brand <input name="brand" value="{{ item.brand }}" maxlength="128"></label>
   <label>Location <input name="location" value="{{ item.location }}" maxlength="128"></label>
   <label>cogs item <input name="cogs_item_id" value="{{ item.cogs_item_id }}" placeholder="workshop only"></label>
   <label>cogs build <input name="cogs_build_id" value="{{ item.cogs_build_id }}"></label>
-  <label>Notes <textarea name="notes">{{ item.notes }}</textarea></label>
-  <button type="submit">Save</button>
+  <label class="wide">Notes <textarea name="notes">{{ item.notes }}</textarea></label>
+  <label class="wide">Description
+    <textarea name="description" maxlength="40000">{{ item.description }}</textarea>
+  </label>
+  <label>eBay category ID <input name="ebay_category_id" value="{{ item.ebay_category_id }}" maxlength="32"></label>
+  <label class="wide">eBay category <input name="ebay_category_name" value="{{ item.ebay_category_name }}" maxlength="128"></label>
+  <label class="wide">Add photos
+    <input type="file" name="photos" accept="image/jpeg,image/png,image/webp,image/gif" multiple>
+  </label>
+  <div class="form-actions">
+    <button type="button" data-suggest>Suggest from photos and eBay</button>
+    <button type="submit">Save</button>
+  </div>
+  <p class="muted" data-suggest-status>Suggest here fills the form only. Use Fill and save below to write the shelf row.</p>
+  <div data-comps></div>
 </form>
+
+<form class="status-form" method="post" action="/items/{{ item.sku }}/suggest">
+  <button type="submit">Fill and save from photos and eBay</button>
+</form>
+
+{% set ns = namespace(has_active=false) %}
+{% for L in item.listings or [] %}
+  {% if L.status == 'active' %}{% set ns.has_active = true %}{% endif %}
+{% endfor %}
+{% if not ns.has_active %}
+<h2>List on eBay</h2>
+<p class="muted">Uploads photos to eBay, then creates a fixed-price listing. Requires ask price, at least one photo, and a description. Type LIST to confirm.</p>
+<form class="status-form" method="post" action="/items/{{ item.sku }}/list">
+  <input type="hidden" name="next" value="/items/{{ item.sku }}">
+  <label>Type LIST
+    <input name="confirm" autocomplete="off">
+  </label>
+  <button type="submit">List on eBay</button>
+</form>
+{% endif %}
 
 {% if item.listings %}
 <h2>Listings</h2>
@@ -81,11 +156,14 @@
 {% endif %}
 
 <h2>Remove</h2>
-<p class="muted">Deletes this shelf row. Live eBay listings stay up until you end them above.</p>
+<p class="muted">Deletes this shelf row and local photos. Live eBay listings stay up until you end them above.</p>
 <form class="status-form" method="post" action="/items/{{ item.sku }}/remove">
   <label>Type REMOVE
     <input name="confirm" autocomplete="off">
   </label>
   <button class="danger" type="submit">Delete item</button>
 </form>
+{% endblock %}
+{% block scripts %}
+<script src="/static/listing-assist.js"></script>
 {% endblock %}

@@ -3,8 +3,8 @@
 **Audience:** Developer (primary); Manager (secondary)  
 **Audiences:** developer, manager  
 **Status:** Active  
-**Doc-reviewed:** 2026-09-02  
-**Summary:** Version history for the f-bargarage store repo, including LAN listing mutations and monthly reports.
+**Doc-reviewed:** 2026-09-03  
+**Summary:** Version history for the f-bargarage store repo, including inventory listing, item specifics, and incremental eBay refresh.
 
 ---
 
@@ -15,8 +15,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.0] - 2026-09-03
+
 ### Added
-- Operations note that sold motorcycle parts (GB/GC) payouts are current as of 2026-09-02
+- Add-to-inventory tab with photos, description, condition, brand, and eBay category
+- Suggest listing fields from matching eBay listings and optional OpenAI/Gemini vision
+- List an unlisted SKU on eBay from Inventory or the item page
+- Store and show eBay item specifics (manufacturer, model, colors, case size, band width, wrist size)
+- Pull extra photos and fields from a live listing onto the matching SKU
+- Inventory defaults to active or not posted; sold is a separate filter
+- Batch status, category, location, delete, and eBay field pull on Inventory; batch end/relist on Listings
+
+### Changed
+- Refresh from eBay only writes changed listings and recent orders (last 3 days)
+- New SKUs get descriptions, photos, and specifics in the background after refresh
+
+### Fixed
+- Home item count rendered as a dict method instead of the shelf total
+- Refresh hung while GetItem and photo download ran for every live listing
 
 ## [0.4.1] - 2026-09-01
 
@@ -95,7 +111,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Updated workspace configuration with Python settings, file exclusions, and extension recommendations
 
-[Unreleased]: https://github.com/dg0696/fbargarage/compare/v0.4.1...HEAD
+[Unreleased]: https://github.com/dg0696/fbargarage/compare/v0.5.0...HEAD
+[0.5.0]: https://github.com/dg0696/fbargarage/releases/tag/v0.5.0
 [0.4.1]: https://github.com/dg0696/fbargarage/releases/tag/v0.4.1
 [0.4.0]: https://github.com/dg0696/fbargarage/releases/tag/v0.4.0
 [0.3.3]: https://github.com/dg0696/fbargarage/releases/tag/v0.3.3

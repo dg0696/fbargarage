@@ -21,7 +21,7 @@ sys.path.insert(0, str(ROOT / "scripts"))
 sys.path.insert(0, str(ROOT / "scripts" / "lib"))
 
 from ebay_client import EbayClient  # noqa: E402
-from store_app.store import counts, upsert_order  # noqa: E402
+from store_app.store import counts, latest_order_sold_on, upsert_order  # noqa: E402
 
 WINDOW_DAYS = 89
 
@@ -71,10 +71,17 @@ def fetch_orders(client: EbayClient, since: date) -> list[dict]:
     return orders
 
 
-def sync(since: date) -> dict[str, int]:
+def default_since() -> date:
+    if latest_order_sold_on():
+        return date.today() - timedelta(days=3)
+    return date(2026, 1, 1)
+
+
+def sync(since: date | None = None) -> dict[str, int]:
     client = EbayClient()
     if client.environment != "production":
-        raise SystemExit("EBAY_API_ENV must be production for live orders")
+        raise RuntimeError("EBAY_API_ENV must be production for live orders")
+    since = since or default_since()
     imported = 0
     for order in fetch_orders(client, since):
         order_id = str(order.get("legacyOrderId") or order.get("orderId") or "").strip()

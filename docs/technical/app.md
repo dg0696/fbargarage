@@ -3,8 +3,8 @@
 **Audience:** Developer (primary); Operations (secondary)  
 **Audiences:** developer, operations  
 **Status:** Active  
-**Doc-reviewed:** 2026-09-01  
-**Summary:** FastAPI UI on `:5057` reads and writes MySQL `ebay_store`, can end/revise/relist Seller Hub listings, and shows monthly SQLite reports.
+**Doc-reviewed:** 2026-09-03  
+**Summary:** FastAPI UI on `:5057` reads and writes MySQL `ebay_store`. Add inventory with photos and listing fields, fill from eBay matches (optional AI), then list, end, revise, or relist. Refresh only pulls changes. Monthly SQLite reports are on `/reports`.
 
 ---
 
@@ -26,9 +26,10 @@ Copy **cogs**, not Resume-Builder. Apache is static httpd with no PHP.
 | Page | Job |
 |------|-----|
 | Home | Counts by status and stream |
-| Inventory | Search, add, edit, delete shelf rows; First / Previous / page numbers / Next / Last |
-| Item | Qty, cost, location, cogs IDs, linked listings; **Update on eBay** price/qty; **End listing**; **Relist** |
-| Listings | Active eBay rows with the same table pager; **End**; ended rows **Relist**; **Refresh from eBay** pulls listings and 2026 orders |
+| Inventory | Defaults to active or not posted (sold hidden). **List** publishes an unlisted SKU to eBay. Primary photo from local files or the matched listing. Batch: status, category, location, delete, pull eBay fields |
+| Add to inventory | New shelf SKU with photos, description, condition, brand, eBay category; **Suggest from photos and eBay**; optional list on save |
+| Item | Same listing fields; add/remove photos; **Fill and save** from comps/AI; **Create eBay listing**; **Update on eBay** price/qty; **End**; **Relist** |
+| Listings | Active eBay rows with the same table pager; **End**; ended rows **Relist**; batch end/relist; **Refresh from eBay** only pulls changed listings (GetSellerEvents) and recent orders; new SKUs get details in the background |
 | Reports | Monthly all-orders and SKU G text, same as `run_monthly_reports.py --from-db` |
 
 ## LAN API (cogs)
@@ -44,6 +45,7 @@ Copy **cogs**, not Resume-Builder. Apache is static httpd with no PHP.
 python scripts/ebay_user_oauth.py
 python scripts/store_ebay_secrets.py --export-docker
 python scripts/sync_listings.py
+python scripts/sync_listings.py --incremental
 python scripts/sync_orders.py
 python scripts/serve.py
 python scripts/deploy_ui.py
@@ -63,9 +65,13 @@ python scripts/ebay_user_oauth.py
 python scripts/store_ebay_secrets.py --export-docker
 ```
 
-The first command prompts you to paste Production App ID, Dev ID, and Cert ID. Sandbox keys already in WCM are kept as `*_SANDBOX`. User OAuth must include **sell.inventory** (write) for End / revise — enable that scope on the eBay app if consent fails.
+The first command prompts you to paste Production App ID, Dev ID, and Cert ID. Sandbox keys already in WCM are kept as `*_SANDBOX`. User OAuth must include **sell.inventory** (write) for End / revise / create — enable that scope on the eBay app if consent fails.
 
-`.env` may keep `EBAY_API_ENV` and MySQL host names. Docker on TrueNAS uses `docker.env` for `DB_PASSWORD` and eBay tokens.
+Optional vision drafts: set `OPENAI_API_KEY` or `GEMINI_API_KEY` in `docker.env`. Without a key, Suggest still fills from matching eBay listings and GetSuggestedCategories.
+
+Create listing copies shipping/return/payment policies from an existing active listing, or from `EBAY_SHIPPING_PROFILE_ID`, `EBAY_RETURN_PROFILE_ID`, and `EBAY_PAYMENT_PROFILE_ID`.
+
+`.env` may keep `EBAY_API_ENV` and MySQL host names. Docker on TrueNAS uses `docker.env` for `DB_PASSWORD` and eBay tokens. Item photos persist in `data/item_photos/` (gitignored, Docker volume).
 
 ## eBay Production unlock
 

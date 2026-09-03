@@ -29,4 +29,5 @@ services:
     volumes:
       - ./db/ebay_store.db:/app/db/ebay_store.db
       - ./reports:/app/reports
+      - ./data/item_photos:/app/data/item_photos
     restart: unless-stopped

@@ -3,8 +3,8 @@
 **Audience:** Developer (primary); Operations, Manager (secondary)  
 **Audiences:** developer, operations, manager  
 **Status:** Active  
-**Doc-reviewed:** 2026-09-01  
-**Summary:** This repo is the primary f-bargarage store project. Financial reports run from SQLite and show on the LAN UI. Shelf inventory and listings live in MySQL on `:5057`, including end, revise, and relist.
+**Doc-reviewed:** 2026-09-03  
+**Summary:** This repo is the primary f-bargarage store project. Financial reports run from SQLite and show on the LAN UI. Shelf inventory and listings live in MySQL on `:5057`, including photos, AI/eBay drafts, list, end, revise, relist, and incremental refresh.
 
 ---
 
@@ -52,7 +52,13 @@ See [docs/REPORTING.md](docs/REPORTING.md) for the monthly workflow and [docs/DA
 
 FastAPI + Docker on **`:5057`**, MySQL `ebay_store`. Apache `:8080` is a static card only. Cogs reads `GET /health`, `/api/listings`, `/api/orders`.
 
-Add and remove shelf items in the UI. End a live listing from Listings or Item (type END on the item page). Relist an ended listing from Listings (ended filter) or Item (type RELIST). Change price and qty on the Item page with **Update on eBay**.
+**Add to inventory** is its own tab. Add a shelf item with photos, description, condition, brand, and eBay category. **Suggest from photos and eBay** fills those fields from matching listings (and from OpenAI or Gemini if you set a key). After save you land on the item page; type LIST to create the eBay listing, or check **Also list on eBay after save** on the add form.
+
+**Refresh from eBay** only pulls listings that changed and orders from the last few days. New SKUs get extra photos and item specifics in the background. Inventory shows the primary picture (local file, or the eBay image until the download finishes). Use **List** on a row that is not posted.
+
+Select rows on Inventory or Listings and use **Apply to selected**: status/category/location/delete on the shelf, or end/relist on eBay.
+
+End a live listing from Listings or Item (type END). Relist an ended listing from Listings (ended filter) or Item (type RELIST). Change price and qty on the Item page with **Update on eBay**.
 
 See [docs/technical/app.md](docs/technical/app.md).
 
